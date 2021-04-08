@@ -5,25 +5,23 @@ import (
 	"encoding/binary"
 	"io/ioutil"
 	"log"
-
-	"github.com/maseology/mmio"
 )
 
 func ReadHGSstructure(fp string) (nps, eps, nsl int) {
-	if _, ok := mmio.FileExists(fp); !ok {
+	if !fileExists(fp) {
 		log.Fatalf("ReadHGSstructure error: file %s does not exist\n", fp)
 	}
 
 	b, err := ioutil.ReadFile(fp)
 	if err != nil {
-		log.Fatalf("readHGSscalar failed: %v\n", err)
+		log.Fatalf("ReadHGSstructure readHGSscalar failed: %v\n", err)
 	}
 
 	buf := bytes.NewReader(b)
 	readBuf := func(v interface{}) {
 		err := binary.Read(buf, binary.LittleEndian, v)
 		if err != nil {
-			log.Fatalf("ReadBinary failed: %v\n", err)
+			log.Fatalf("ReadHGSstructure ReadBinary failed: %v\n", err)
 		}
 	}
 
@@ -31,12 +29,12 @@ func ReadHGSstructure(fp string) (nps, eps, nsl int) {
 	testRec := func(recb int32) {
 		readBuf(&rece)
 		if recb != rece {
-			log.Fatalf("file read error recb != rece\n")
+			log.Fatalf("ReadHGSstructure file read error recb != rece\n")
 		}
 	}
 	chkRec := func(against int) {
 		if recb != int32(against) {
-			log.Fatalf("file read error recb not as expected\n")
+			log.Fatalf("ReadHGSstructure file read error recb not as expected\n")
 		}
 	}
 
@@ -85,11 +83,11 @@ func ReadHGSstructure(fp string) (nps, eps, nsl int) {
 	readBuf(&itmp) // maximum number of nodes connected to a node for the 2D triangular mesh
 	testRec(recb)
 
-	if !mmio.ReachedEOF(buf) {
-		log.Fatalf("more file to be read")
+	if !reachedEOF(buf) {
+		log.Fatalf("ReadHGSstructure more file to be read")
 	}
 	if nn%nz != 0 {
-		log.Fatalf("file error 2")
+		log.Fatalf("ReadHGSstructure file error n nodes (%d) does not divide into %d slices\n", nn, nz)
 	}
 
 	nps = int(nn / nz)
