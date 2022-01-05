@@ -7,7 +7,7 @@ import (
 	"log"
 )
 
-func ReadHGSstructure(fp string) (nps, eps, nsl int) {
+func ReadHGSstructure(fp string) (coords [][3]float64, nps, eps, nsl int) {
 	if !fileExists(fp) {
 		log.Fatalf("ReadHGSstructure error: file %s does not exist\n", fp)
 	}
@@ -45,13 +45,15 @@ func ReadHGSstructure(fp string) (nps, eps, nsl int) {
 
 	readBuf(&recb)
 	chkRec(8 * 3 * int(nn))
-	type xyz [3]float64
-	coords := make([]xyz, nn)
-	var c xyz
-	for i := int32(0); i < nn; i++ {
-		readBuf(&c)
-		coords[i] = c
+	coords = make([][3]float64, nn)
+	if err := binary.Read(buf, binary.LittleEndian, &coords); err != nil {
+		log.Fatalln("ReadHGSstructure read coordinates failed: ", err)
 	}
+	// var c [3]float64
+	// for i := int32(0); i < nn; i++ {
+	// 	readBuf(&c)
+	// 	coords[i] = c
+	// }
 	testRec(recb)
 
 	readBuf(&recb)
