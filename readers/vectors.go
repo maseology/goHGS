@@ -17,7 +17,7 @@ func readInt32(b *bytes.Reader) (i int32) {
 	return
 }
 
-func ReadHGSvector(fp string, nps, epl, nly int) (float64, [][3]float32) {
+func ReadHGSvector(fp string) (float64, [][3]float32) {
 	b, err := ioutil.ReadFile(fp)
 	if err != nil {
 		log.Fatal(err)
@@ -43,16 +43,16 @@ func ReadHGSvector(fp string, nps, epl, nly int) (float64, [][3]float32) {
 		log.Fatalln("readHGS file size error: ", err)
 	}
 	nnds := (flen - 88) / (12 + 8) ////////// HARD-CODED "12" //////////
-	vlist := make([]float32, nnds)
+	nv := (12 + 8) / 4             ////////// HARD-CODED "12" //////////
+	vlist := make([]float32, nnds*nv)
 	if err := binary.Read(buf, binary.LittleEndian, &vlist); err != nil {
 		log.Fatalln("readHGS read vector failed: ", err)
 	}
 
 	vs := make([][3]float32, nnds)
-	nv := (12 + 8) / 4 ////////// HARD-CODED "12" //////////
-	bn := math.Float32frombits(12)
-	for i := 0; i < int(nnds)/nv; i++ {
-		if vlist[i*nv] != bn && vlist[i*nv+nv-1] != bn {
+	bn := math.Float32frombits(12) ////////// HARD-CODED "12" //////////
+	for i := 0; i < nnds; i++ {
+		if vlist[i*nv] != bn && vlist[(i+1)*nv-1] != bn {
 			log.Fatal("vector read error")
 		}
 		vs[i][0] = vlist[i*nv+1] ////////// HARD-CODED "12" //////////
