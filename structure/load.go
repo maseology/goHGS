@@ -14,10 +14,10 @@ func Read(directoryPrefix string) *HGS {
 	}
 
 	if ne != epl*(nsl-1) {
-		panic("1")
+		panic("goHGS Read() 1")
 	}
 	if epl != epl2 {
-		panic("2")
+		panic("goHGS Read() 2")
 	}
 	h := &HGS{
 		Nn:   nps * nsl,
